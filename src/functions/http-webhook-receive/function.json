@@ -1,0 +1,18 @@
+{
+  "bindings": [
+    {
+      "direction": "in",
+      "type": "httpTrigger",
+      "name": "Request",
+      "authLevel": "anonymous",
+      "methods": [
+        "post"
+      ]
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "Response"
+    }
+  ]
+}

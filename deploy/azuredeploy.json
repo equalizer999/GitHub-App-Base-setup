@@ -1,0 +1,253 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "env": {
+      "type": "string",
+      "defaultValue": "dev"
+    },
+    "gitHubAppId": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "gitHubAppPrivateKeyContent": {
+      "type": "securestring",
+      "defaultValue": ""
+    }
+  },
+  "variables": {
+    "custAbbr": "me",
+    "projName": "githubint",
+    "regionName": "we",
+    "uniquepart": "[uniqueString(subscription().subscriptionId)]",
+    "uniquepartSmall": "[take(variables('uniquepart'), 5)]",
+    "env": "[parameters('env')]",
+    "envLow": "[toLower(variables('env'))]",
+    "lastNamePart": "[concat(variables('projName'),'-', variables('envLow'), '-', variables('regionName'), '-', variables('uniquepartSmall'))]",
+    "storageAccountNameFunctions": "[concat(variables('custAbbr'), 'saf', variables('projName'), variables('envLow'), variables('regionName'), variables('uniquepartSmall'))]",
+    "appInsightsName": "[concat(variables('custAbbr'), '-ai-', variables('lastNamePart'))]",
+    "appHostingPlanName": "[concat(variables('custAbbr'), '-asp-', variables('lastNamePart'))]",
+    "functionsWebAppName": "[concat(variables('custAbbr'), '-fa-',  variables('lastNamePart'))]",
+    "keyVaultName": "[concat(variables('custAbbr'), 'kv', variables('projName'), variables('envLow'), variables('regionName'),variables('uniquepartSmall'))]",
+    "gitHubAppIdSecretName" : "gitHubAppId",
+    "gitHubAppPrivateKeyContentSecretName" : "gitHubAppPrivateKeyContent"
+  },
+  "resources": [
+    {
+      "apiVersion": "2019-04-01",
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[variables('storageAccountNameFunctions')]",
+      "location": "[resourceGroup().location]",
+      "kind": "StorageV2",
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "properties": {
+        "accessTier": "Hot",
+        "encryption": {
+          "services": {
+            "file": { "enabled": true },
+            "blob": { "enabled": true }
+          },
+          "keySource": "Microsoft.Storage"
+        },
+        "supportsHttpsTrafficOnly": true
+      }
+    },
+    {
+      "apiVersion": "2015-05-01",
+      "type": "Microsoft.Insights/components",
+      "name": "[variables('appInsightsName')]",
+      "location": "westeurope",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web"
+      }
+    },
+    {
+      "apiVersion": "2018-02-01",
+      "type": "Microsoft.Web/serverfarms",
+      "name": "[variables('appHostingPlanName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "name":"[variables('appHostingPlanName')]",
+        "computeMode":"Dynamic"
+      },
+      "sku":{  
+        "name":"Y1",
+        "tier":"Dynamic",
+        "size":"Y1",
+        "family":"Y",
+        "capacity":0
+      }
+    },
+    {
+      "apiVersion": "2018-02-01",
+      "type": "Microsoft.Web/sites",
+      "name": "[variables('functionsWebAppName')]",
+      "location": "[resourceGroup().location]",
+      "kind": "functionapp",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNameFunctions'))]",
+        "[resourceId('Microsoft.Web/serverfarms', variables('appHostingPlanName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+      ],
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appHostingPlanName'))]",
+        "enabled": true,
+        "hostNameSslStates": [
+          {
+            "name": "[concat(variables('functionsWebAppName'), '.azurewebsites.net')]",
+            "sslState": "Disabled",
+            "hostType": "Standard"
+          },
+          {
+            "name": "[concat(variables('functionsWebAppName'), '.scm.azurewebsites.net')]",
+            "sslState": "Disabled",
+            "hostType": "Repository"
+          }
+        ],
+        "reserved": false,
+        "scmSiteAlsoStopped": false,
+        "clientAffinityEnabled": false,
+        "clientCertEnabled": false,
+        "hostNamesDisabled": false,
+        "containerSize": 1536,
+        "dailyMemoryTimeQuota": 0,
+        "httpsOnly": true,
+        "siteConfig": {
+          "appSettings": [
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(concat('microsoft.insights/components/', variables('appInsightsName'))).InstrumentationKey]"
+            },
+            {
+              "name": "AAPPLICATIONINSIGHTS_CONNECTION_STRING",
+              "value": "[concat('InstrumentationKey=', reference(concat('microsoft.insights/components/', variables('appInsightsName'))).InstrumentationKey)]"
+            },
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountNameFunctions'), ';AccountKey=', listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNameFunctions')),'2017-06-01').keys[0].value, ';EndpointSuffix=core.windows.net')]"
+            },
+            {
+              "name": "AzureWebJobsDashboard",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountNameFunctions'), ';AccountKey=', listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNameFunctions')),'2017-06-01').keys[0].value, ';EndpointSuffix=core.windows.net')]"
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~4"
+            },            
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME_VERSION",
+              "value": "~7"
+            },
+			      {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "powershell"
+            },
+            {
+              "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountNameFunctions'), ';AccountKey=', listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNameFunctions')),'2017-06-01').keys[0].value, ';EndpointSuffix=core.windows.net')]"
+            },
+            {
+              "name": "WEBSITE_MAX_DYNAMIC_APPLICATION_SCALE_OUT",
+              "value": "1"
+            },
+            {
+              "name": "WEBSITE_CONTENTSHARE",
+              "value": "[concat(variables('storageAccountNameFunctions'), '112112')]"
+            },
+            {
+              "name": "GitHubAppId",
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyVaultName'), '.vault.azure.net/secrets/', variables('gitHubAppIdSecretName'), '/)')]"
+            },
+            {
+              "name": "GitHubAppPrivateKeyContent",
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyVaultName'), '.vault.azure.net/secrets/', variables('gitHubAppPrivateKeyContentSecretName'), '/)')]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "2019-09-01",
+      "type": "Microsoft.KeyVault/vaults",
+      "name": "[variables('keyVaultName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "enabledForDeployment": true,
+        "enabledForDiskEncryption": true,
+        "enabledForTemplateDeployment": true,
+        "accessPolicies": [],
+        "networkAcls": {
+          "defaultAction": "Allow",
+          "bypass": "AzureServices"
+        },
+        "tenantId": "[subscription().tenantId]",
+        "sku": {
+          "name": "Standard",
+          "family": "A"
+        }
+      }
+    },
+    {
+      "apiVersion": "2019-09-01",
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "name": "[concat(variables('keyVaultName'), '/', variables('gitHubAppIdSecretName'))]",
+      "location": "[resourceGroup().location]",
+      "condition": "[not(empty(parameters('gitHubAppId')))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ],
+      "properties": {
+        "value": "[parameters('gitHubAppId')]"
+      }
+    },
+    {
+      "apiVersion": "2019-09-01",
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "name": "[concat(variables('keyVaultName'), '/', variables('gitHubAppPrivateKeyContentSecretName'))]",
+      "location": "[resourceGroup().location]",
+      "condition": "[not(empty(parameters('gitHubAppPrivateKeyContent')))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ],
+      "properties": {
+        "value": "[parameters('gitHubAppPrivateKeyContent')]"
+      }
+    },
+    {
+      "apiVersion": "2019-09-01",
+      "type": "Microsoft.KeyVault/vaults/accessPolicies",
+      "name": "[concat(variables('keyVaultName'), '/add')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('gitHubAppIdSecretName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('gitHubAppPrivateKeyContentSecretName'))]",
+        "[resourceId('Microsoft.Web/sites', variables('functionsWebAppName'))]"
+      ],
+      "properties": {
+        "accessPolicies": [
+          {
+            "tenantId": "[reference(resourceId('Microsoft.Web/sites', variables('functionsWebAppName')), '2019-08-01', 'full').identity.tenantId]",
+            "objectId": "[reference(resourceId('Microsoft.Web/sites', variables('functionsWebAppName')), '2019-08-01', 'full').identity.principalId]",
+            "permissions": {
+              "secrets": [
+                "get"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "functionAppName": {
+      "type": "string",
+      "value": "[variables('functionsWebAppName')]"
+    }
+  }
+}

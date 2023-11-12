@@ -51,6 +51,7 @@ Write-Host "Starting deploy for created archive to function app: '$functionAppNa
 ## Function app sources deployment
 $funcAppArchivePath = "$PSScriptRoot/$functionAppZipName"
 
+# Use Publish-AzWebapp cmdlet to upload the zip file to the function app
 Publish-AzWebapp -ResourceGroupName $ResourceGroupName -Name $functionAppNameToLowerCase -ArchivePath $funcAppArchivePath -Force | Out-Null
 Write-Host "-> Done"
 

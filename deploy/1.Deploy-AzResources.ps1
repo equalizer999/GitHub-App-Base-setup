@@ -50,6 +50,7 @@ if ($null -eq (Get-AzResourceGroup -Name $ResourceGroupName -Location $ResourceG
 
 # Resource deployment
 Write-Host "Deploying resources - This can take some time"
+# Pass the GitHubAppId and GitHubAppPrivateKeyContent as parameters to the template file
 $deploymentResult = New-AzResourceGroupDeployment -Name ((Get-ChildItem $TemplateFile).BaseName + '-' + ((Get-Date).ToUniversalTime()).ToString('yyyyMMdd-HHmmss')) `
                                     -ResourceGroupName $ResourceGroupName `
                                     -TemplateFile $TemplateFilePath `

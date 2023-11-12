@@ -59,6 +59,7 @@ $exp = [int][double]::parse((Get-Date -Date $((Get-Date).addseconds(300).ToUnive
 $iat = [int][double]::parse((Get-Date -Date $((Get-Date).ToUniversalTime()) -UFormat %s))
 
 ## Generate a signed JWT token
+# Use powershell-jwt module to create a JWT token with the given algorithm, issuer, expiry, and secret key
 $jwtToken = New-JWT -Algorithm "RS256" -Issuer $gitHubAppId -ExpiryTimestamp $exp -SecretKey $gitHubAppPrivateKeyContent -PayloadClaims @{ "iat" = $iat}
 
 ## TODO: Uncomment the following line - only for debugging
@@ -78,6 +79,7 @@ if ($null -ne $githubAppInstallTargetId) {
     }
 
     ## Fetching access token for installation
+    # Use Invoke-WebRequest cmdlet to make a POST request to the GitHub API with the given headers
     $jsonResult = Invoke-WebRequest -Uri $apiUrl -Headers $accessTokenHeaders -Method POST | ConvertFrom-Json
     $accesstoken = $jsonResult.token
 
@@ -100,6 +102,7 @@ $accessTokenHeaders = @{
 }
 
 ## Get the repositories this token has access to
+### Docs: https://docs.github.com/en/rest/reference/apps#list-repositories-accessible-to-the-app-installation
 ###########################################
 # Write-Host "List repository access for current access token"
 # $apiUrl = "https://api.github.com/installation/repositories"

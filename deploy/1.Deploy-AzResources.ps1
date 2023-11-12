@@ -2,7 +2,7 @@ Param(
 
     [string] $ResourceGroupLocation = 'West Europe',
 
-    [string] $ResourceGroupName = "github-int-we-231101",
+    [string] $ResourceGroupName = "github-int-we-231107",
 
     [string] $TemplateFile = "azuredeploy.json",
 
@@ -12,11 +12,13 @@ Param(
 
     [Parameter(Mandatory=$true)]
     [ValidateNotNullOrEmpty()]
-    [string] $GitHubAppPrivateKeyPath    
+    [string] $GitHubAppPrivateKeyPath
 )
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version 3
+
+Write-Output "Reading contents from 'GitHubAppPrivateKeyPath'"
 
 # Test if path for GitHubAppPrivateKeyPath is valid
 if (-not (Test-Path $GitHubAppPrivateKeyPath)) {
@@ -27,6 +29,8 @@ if (-not (Test-Path $GitHubAppPrivateKeyPath)) {
 # Read GitHubAppPrivateKeyContent from file and convert to SecureString
 $GitHubAppPrivateKeyContent = Get-Content $GitHubAppPrivateKeyPath -Raw
 $GitHubAppPrivateKeyContentAsSecureString = ConvertTo-SecureString $GitHubAppPrivateKeyContent -AsPlainText -Force
+
+Write-Host "-> Done"
 
 # Test if template file path exists
 $TemplateFilePath = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($PSScriptRoot, $TemplateFile))

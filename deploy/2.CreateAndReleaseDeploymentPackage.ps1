@@ -8,9 +8,24 @@ Param(
     [string] $FunctionAppName    
 )
 
+# Validate parameters
+## Test if resource group exists
+$azGroup = Get-AzResourceGroup -Name $ResourceGroupName -ErrorAction SilentlyContinue
+if ($null -eq $azGroup) {
+    Write-Output "Resource group '$ResourceGroupName' does not exist"
+    exit
+}
+
+## Test if function app exists
+$azFunctionApp = Get-AzWebApp -ResourceGroupName $ResourceGroupName -Name $FunctionAppName -ErrorAction SilentlyContinue
+if ($null -eq $azFunctionApp) {
+    Write-Output "Function app '$FunctionAppName' does not exist"
+    exit
+}
 
 # Init
-$funcappZipName = $FunctionAppName + ((Get-Date).ToUniversalTime()).ToString('yyyyMMddHHmmss') + ".zip".ToLowerInvariant()
+$functionAppNameToLowerCase = $FunctionAppName.ToLowerInvariant()
+$functionAppZipName = $functionAppNameToLowerCase + "-" + ((Get-Date).ToUniversalTime()).ToString('yyyyMMddHHmmss') + ".zip".ToLowerInvariant()
 
 # Create function app archive
 $excludeFilesAndFolders = @(".git",".vscode","bin","Microsoft",".funcignore",".gitignore") 
@@ -24,24 +39,25 @@ foreach ($file in get-childitem -Path ..\src\functions) {
 }
 
 ## Create archive
-Write-Host "Creating archive: '$funcappZipName'"
-Compress-Archive -Path $fileToSendArray -DestinationPath $funcappZipName -Force -CompressionLevel Fastest
+Write-Host "Creating archive: '$functionAppZipName'"
+Compress-Archive -Path $fileToSendArray -DestinationPath $functionAppZipName -Force -CompressionLevel Fastest
 Write-Host "-> Done"
 
-break # TODO: Remove this line to continue with the next step - debug only
+# break # TODO: Comment out this line to continue with the next step - debug only
 
 # Deploy to Azure function app
-Write-Host "Deploying created archive to function app: '$FunctionAppName'"
+Write-Host "Starting deploy for created archive to function app: '$functionAppNameToLowerCase' - This can take some time"
 
 ## Function app sources deployment
-$funcAppArchivePath = "$PSScriptRoot\$funcappZipName"
+$funcAppArchivePath = "$PSScriptRoot/$functionAppZipName"
 
-Write-Host "Deploy function app sources (from '$archivePath') - This can take some time"
-Publish-AzWebapp -ResourceGroupName $ResourceGroupName -Name $FunctionAppName -ArchivePath $funcAppArchivePath -Force | Out-Null
+Publish-AzWebapp -ResourceGroupName $ResourceGroupName -Name $functionAppNameToLowerCase -ArchivePath $funcAppArchivePath -Force | Out-Null
 Write-Host "-> Done"
 
-## Show details
+# Print out details including function url
 Write-Host ""
-Write-Host "------------------------------"
-Write-Host "WEBHOOK_URL: https://$FunctionAppName.azurewebsites.net/api/http-webhook-receive"
-Write-Host "------------------------------"
+Write-Host "---------------------------------------------------"
+Write-Host "ResourceGroupName: $ResourceGroupName"
+Write-Host "FunctionAppName:   $functionAppName"
+Write-Host "FunctionUrl:       https://$functionAppNameToLowerCase.azurewebsites.net/api/http-webhook-receive"
+Write-Host "---------------------------------------------------"

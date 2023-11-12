@@ -9,8 +9,9 @@
    2. [Setting context](#setting-context)
    3. [Prerequisites and assumptions](#prerequisites-and-assumptions)
    4. [Steps for solution setup](#steps-for-solution-setup)
-      1. [1. Create GitHub App](#1-create-github-app)
-      2. [2. Deploy Azure Function infra and code](#2-deploy-azure-function-infra-and-code)
+      1. [Create GitHub App](#create-github-app)
+      2. [Deploy Azure Function infra and code](#deploy-azure-function-infra-and-code)
+2. [Additional resources](#additional-resources)
 
 </details>
 
@@ -26,14 +27,21 @@ What you'll need to set everything up:
 - An active Azure subscription, where you can deploy resources (minimal Contributor rights)
 - A machine with Az Powershell modules installed (we'll use that for the deployment)
 
+```PowerShell
+
+Install-Module Az
+
+```
+
+
 ## Steps for solution setup
-### 1. Create GitHub App
+### Create GitHub App
 Please follow the following doc page for creating a PAT.
 
 **Important** Make sure you select (at least) the following scopes and permissions (-> Repository - Full control)
 **Important** Copy and/or save the created PAT somewhere private, we need it further down the line.
 
-### 2. Deploy Azure Function infra and code
+### Deploy Azure Function infra and code
 Connect to the right Azure subscription. Use the following commands to make sure you are:
 
 ```PowerShell
@@ -53,3 +61,6 @@ Again, go to 'deploy' folder in repo and execute:
 ```PowerShell
 .\2.CreateAndReleaseDeploymentPackage.ps1 -ResourceGroupName "<your-resource-group-name-here>" -FunctionAppName "<paste-here-the-generated-function-app-name>"
 ```
+
+# Additional resources
+- [Azure Functions PowerShell developer guide](https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-powershell?tabs=portal)

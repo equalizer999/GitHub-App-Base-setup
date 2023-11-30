@@ -37,7 +37,7 @@ This repository contains;
 ## Prerequisites and assumptions
 What you'll need to set everything up:
 - A GitHub account :smile:
-- An organization (where you're GitHub account has admin rights)
+- An organization (where your GitHub account has admin rights)
 - An active Azure subscription, where you can deploy resources (minimal Contributor rights)
 - (optional) Postman - For testing/exploring
 - A machine with Az Powershell modules installed (we'll use that for the deployment scripts)
@@ -64,7 +64,7 @@ Go to your GitHub organization and create a new GitHub App - under '`Settings - 
 ![Base GitHub App configuration - empty](./docs/images/base-github-app-configuration-1.drawio.png)
 ![Base GitHub App configuration - filled](./docs/images/base-github-app-configuration-2.drawio.png)
 
-Set the required fields and permissions based on what you want to achieve. Please check the [additional resources](#additional-resources) and/or function [source code](./src/functions/http-webhook-receive/run.ps1) for the app which permissions are used to achieve the desired result.
+Set the required fields and permissions based on what you want to achieve. Please check the [additional resources](#additional-resources) and/or function [source code](./src/functions/http-webhook-receive/run.ps1). Check which permissions are used to achieve the desired result.
 
 ***Important*** We'll update the webhook URL later on, so for now just enter a dummy URL.
 
@@ -98,7 +98,7 @@ Go to 'deploy' folder in the repo and execute:
 - '`Location`' - defaults to '`East US`'
 
 **Important**
-Check the output and copy the '`ResourceGroupName`' and '`FunctionAppName`'. We need it further down the line.
+Check the output and copy the '`ResourceGroupName`' and '`FunctionAppName`'. We need these further down the line.
 
 **Sample**
 ![Deploy azure resources](./docs/images/deploy-azure-resources.drawio.png)
@@ -111,7 +111,7 @@ Go/stay in the 'deploy' folder and execute the following command and pass in the
 ```
 
 **Important**
-Check the output and copy the '`FunctionUrl`'. We need it further down the line.
+Check the output and copy the '`FunctionUrl`'. We will need this further down the line.
 
 **Sample**
 ![Deploy azure function app code](./docs/images/deploy-azure-function-app-code.drawio.png)
@@ -135,14 +135,14 @@ In the sample below, the GitHub App is created and will be installed in a person
 Please check the output of the Azure Function App. You can check if it runs by checking the logs in the Azure Portal. Another way is to go to the GitHub App and check the webhook deliveries.
 
 **Note**
-You can use the '`ping`' request to check if everything is setup correctly. If everything **is** correctly setup and working, you'll see a '`pong`' in the response body. You can redeliver that particular message for checking the latest state.
+You can use the '`ping`' request to check if everything is setup correctly. If everything **is** setup correctly and working, you'll see a '`pong`' in the response body. You can redeliver that particular message for checking the latest state.
 
 ![See webhook deliveries](./docs/images/test-and-check-send-webhooks.drawio.png)
 
 ## Use and setup Postman collection
-You can use the proivded Postman collection for playing around with different API's. This Postman collection only supports calls for:
+You can use the provided Postman collection for playing around with different API's. This Postman collection only supports calls for:
 - Generating accesstoken for a particular organization.
-- Approving a custom deployment rule for approval. 
+- Approving/commenting a custom deployment rule. 
 
 To make them work, you'll have to do a few steps;
 
@@ -153,8 +153,8 @@ Please checkout this documentation provided by Postman, for importing the provid
 ![Find Postman collection variables](./docs/images/postman-collection-variables.drawio.png)
 
 You'll need to update the following variables:
-1. The '`Organization-name`' value, used for additional API calls, pointing to your target organization name.
-2. The '`Organization-install-id`' value, for which you want to use the GitHub App (this is different that the 'App ID', because it is specific to your installation on your organization). You can find this value by going to the GitHub App and clicking on the 'Installations' tab. Then click on the 'Configure' button for the organization you want to use. The URL will contain the value as shown below in the sample.
+1. Update the '`Organization-name`' value to point to your target organization name. This is used for additional API calls.
+2. The '`Organization-install-id`' value, for which you want to use the GitHub App (this is different from the 'App ID', because it is specific to your installation on your organization). You can find this value by going to the GitHub App and clicking on the 'Installations' tab. Then click on the 'Configure' button for the organization you want to use. The URL will contain the value as shown below in the sample.
 
 ![Get installation id from app](./docs/images/get-installation-id.drawio.png)
 
@@ -162,9 +162,9 @@ You'll need to update the following variables:
     - The 'App ID' of the GitHub App.
     - The path to the private key file of the GitHub App.
     
-  This script will generate a short lived JWT token (5 min), which you can use to generate an access token for the organization you want to use. You can find more information about this in the [additional resources](#additional-resources) section.
+This script generates a short-lived JWT token (5 min), which you can use to generate an access token for the organization you want to use. You can find more information about this in the [additional resources](#additional-resources) section.
 
-4. The '`Repo-name`', used for targeting additional API calls to point to the right repository. You can find this value by going to the repository and copy the name.
+4. The '`Repo-name`', used for targeting additional API calls to point to the right repository. You can find this value by going to the repository and copying the name.
 
 # Additional resources
 - [Building a GitHub App that responds to webhook events - GitHub docs](https://docs.github.com/en/apps/creating-github-apps/writing-code-for-a-github-app/building-a-github-app-that-responds-to-webhook-events)

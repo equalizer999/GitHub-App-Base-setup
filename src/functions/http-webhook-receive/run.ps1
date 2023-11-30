@@ -89,8 +89,8 @@ if ($null -ne $githubAppInstallTargetId) {
 # Using the GitHub App Access token to access the GitHub API - example requests below
 
 ## Init
-$owner = "<your-organization-name>"  ## TODO: Replace with your own GitHub usern/organization name
-$repoName = "<your-repo-name>"       ## TODO: Replace with your own GitHub repository name
+$owner = "<your-organization-name>"  ## TODO: Replace with your own GitHub usern/organization name or fetch from the request body
+$repoName = "<your-repo-name>"       ## TODO: Replace with your own GitHub repository name or fetch from the request body
 
 ## Format default headers with jwt header token
 $accessTokenHeaders = @{
@@ -105,6 +105,7 @@ $accessTokenHeaders = @{
 # $apiUrl = "https://api.github.com/installation/repositories"
 # $repoAccessRequestResult = Invoke-WebRequest -Uri $apiUrl -Headers $accessTokenHeaders -Method GET
 # Write-Host $repoAccessRequestResult.Content
+
                 
 ## Get the runner information for a repo
 ### Requires Org permission: 'Read only' for 'administration'
@@ -116,6 +117,7 @@ $accessTokenHeaders = @{
 # $repoRunnerRequestResult = Invoke-WebRequest -Uri $apiUrl -Headers $accessTokenHeaders -Method GET
 # Write-Host $repoRunnerRequestResult.Content
 
+
 ## Load the files in a directory
 ### Docs: https://docs.github.com/en/rest/repos/contents#get-repository-content
 ###########################################
@@ -123,6 +125,7 @@ $accessTokenHeaders = @{
 # $apiUrl = "https://api.github.com/repos/$owner/$repoName/contents"
 # $filesRequestResult = Invoke-WebRequest -Uri $apiUrl -Headers $accessTokenHeaders -Method GET
 # Write-Host $filesRequestResult.Content
+
 
 ## Fetch a file contents (RAW) from a directory (e.g. README.md)
 ### Docs: https://docs.github.com/en/rest/repos/contents#get-repository-content
@@ -138,7 +141,8 @@ $accessTokenHeaders = @{
 # $individualFileStringResult = [System.Text.Encoding]::ASCII.GetString([System.Convert]::FromBase64String($individualFileJsonResult.content))
 # Write-Host $individualFileStringResult
 
-## Comment or approve a deployment rule
+
+## Comment or approve an environment deployment rule
 ### Docs: https://docs.github.com/en/actions/deployment/protecting-deployments/creating-custom-deployment-protection-rules#approving-or-rejecting-deployments 
 # if ($githubHeaderEvent -eq 'deployment_protection_rule') {
 #     Write-Host "GitHub '$githubHeaderEvent' event received"

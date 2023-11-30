@@ -1,8 +1,8 @@
 Param(
 
-    [string] $ResourceGroupLocation = 'West Europe',
+    [string] $ResourceGroupLocation = 'East US',
 
-    [string] $ResourceGroupName = "github-int-we-231107",
+    [string] $ResourceGroupName = "github-int-eus-231128",
 
     [string] $TemplateFile = "azuredeploy.json",
 
@@ -20,9 +20,9 @@ Set-StrictMode -Version 3
 
 Write-Output "Reading contents from 'GitHubAppPrivateKeyPath'"
 
-# Test if path for GitHubAppPrivateKeyPath is valid
+# Test if path for GitHubAppPrivateKeyPath exists
 if (-not (Test-Path $GitHubAppPrivateKeyPath)) {
-    Write-Output "GitHubAppPrivateKeyPath '$GitHubAppPrivateKeyPath' is not valid"
+    Write-Output "GitHubAppPrivateKeyPath '$GitHubAppPrivateKeyPath' does not exist"
     exit
 }
 

@@ -4,7 +4,7 @@
   "parameters": {
     "env": {
       "type": "string",
-      "defaultValue": "dev"
+      "defaultValue": "prd"
     },
     "gitHubAppId": {
       "type": "string",
@@ -16,9 +16,9 @@
     }
   },
   "variables": {
-    "custAbbr": "me",
-    "projName": "githubint",
-    "uniquepart": "[uniqueString(subscription().subscriptionId)]",
+    "custAbbr": "int", // Internal
+    "projName": "ghint", // GitHub integration
+    "uniquepart": "[uniqueString(resourceGroup().id, deployment().name)]",
     "uniquepartSmall": "[take(variables('uniquepart'), 5)]",
     "env": "[parameters('env')]",
     "envLow": "[toLower(variables('env'))]",
@@ -58,7 +58,7 @@
       "apiVersion": "2015-05-01",
       "type": "Microsoft.Insights/components",
       "name": "[variables('appInsightsName')]",
-      "location": "westeurope",
+      "location": "[resourceGroup().location]",
       "kind": "web",
       "properties": {
         "Application_Type": "web"

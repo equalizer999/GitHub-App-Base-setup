@@ -7,7 +7,7 @@
 - [GitHub App - Base Setup](#github-app---base-setup)
   - [Table of Contents](#table-of-contents)
   - [Setting context](#setting-context)
-    - [Higlevel architecture](#higlevel-architecture)
+    - [Highlevel architecture](#highlevel-architecture)
   - [Prerequisites and assumptions](#prerequisites-and-assumptions)
   - [Solution setup steps](#solution-setup-steps)
     - [1. Create a GitHub App](#1-create-a-github-app)
@@ -31,7 +31,7 @@ This repository contains;
 - Providing a sample Azure Function App (PowerShell) which can be used to receive and process GitHub webhooks.
 - Sample/test resources for using [Postman](https://www.postman.com/) as an exploration tool.
 
-### Higlevel architecture
+### Highlevel architecture
 ![Highlevel architecture](./docs/images/architecture.drawio.svg)
 
 ## Prerequisites and assumptions

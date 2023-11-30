@@ -1,0 +1,174 @@
+{
+	"info": {
+		"name": "GitHub - App - Samples",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "GitHub App - Access Token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Set RepositoryAccessToken value\", function () {",
+							"    var jsonData = JSON.parse(pm.response.text());",
+							"    pm.collectionVariables.set(\"RepositoryAccessToken\", jsonData.token)",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/vnd.github+json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{JwtToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n   \"permissions\": {\n      \"deployments\": \"write\"\n   }\n}"
+				},
+				"url": {
+					"raw": "https://api.github.com/app/installations/{{Organization-install-id}}/access_tokens",
+					"protocol": "https",
+					"host": [
+						"api",
+						"github",
+						"com"
+					],
+					"path": [
+						"app",
+						"installations",
+						"{{Organization-install-id}}",
+						"access_tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GitHub App - Environment Approval - GitHub App - State",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/vnd.github+json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{RepositoryAccessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"environment_name\":\"production\",\n    //\"state\":\"approved\",\n    \"comment\":\"Still work in progress\"\n}"
+				},
+				"url": {
+					"raw": "https://api.github.com/repos/{{Organization-name}}/{{Repo-name}}/actions/runs/{{Run-id}}/deployment_protection_rule",
+					"protocol": "https",
+					"host": [
+						"api",
+						"github",
+						"com"
+					],
+					"path": [
+						"repos",
+						"{{Organization-name}}",
+						"{{Repo-name}}",
+						"actions",
+						"runs",
+						"{{Run-id}}",
+						"deployment_protection_rule"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "Organization-name",
+			"value": "<org-name>",
+			"type": "string"
+		},
+		{
+			"key": "Organization-install-id",
+			"value": "<org-install-id>"
+		},
+		{
+			"key": "JwtToken",
+			"value": "<raw-jwt-token>"
+		},
+		{
+			"key": "Repo-name",
+			"value": "<repo-name>",
+			"type": "string"
+		},
+		{
+			"key": "RepositoryAccessToken",
+			"value": ""
+		}
+	]
+}

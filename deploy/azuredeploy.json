@@ -13,6 +13,10 @@
     "gitHubAppPrivateKeyContent": {
       "type": "securestring",
       "defaultValue": ""
+    },
+    "gitHubAppWebhookSecret": {
+      "type": "securestring",
+      "defaultValue": ""
     }
   },
   "variables": {
@@ -28,8 +32,9 @@
     "appHostingPlanName": "[concat(variables('custAbbr'), '-asp-', variables('lastNamePart'))]",
     "functionsWebAppName": "[concat(variables('custAbbr'), '-fa-',  variables('lastNamePart'))]",
     "keyVaultName": "[concat(variables('custAbbr'), 'kv', variables('projName'), variables('envLow'), variables('uniquepartSmall'))]",
-    "gitHubAppIdSecretName" : "gitHubAppId",
-    "gitHubAppPrivateKeyContentSecretName" : "gitHubAppPrivateKeyContent"
+    "gitHubAppIdSecretName": "gitHubAppId",
+    "gitHubAppPrivateKeyContentSecretName": "gitHubAppPrivateKeyContent",
+    "gitHubAppWebhookSecretSecretName": "gitHubAppWebhookSecret"
   },
   "resources": [
     {
@@ -167,6 +172,10 @@
             {
               "name": "GitHubAppPrivateKeyContent",
               "value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyVaultName'), '.vault.azure.net/secrets/', variables('gitHubAppPrivateKeyContentSecretName'), '/)')]"
+            },
+            {
+              "name": "GitHubAppWebhookSecret",
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyVaultName'), '.vault.azure.net/secrets/', variables('gitHubAppWebhookSecretSecretName'), '/)')]"
             }
           ]
         }
@@ -198,7 +207,6 @@
       "type": "Microsoft.KeyVault/vaults/secrets",
       "name": "[concat(variables('keyVaultName'), '/', variables('gitHubAppIdSecretName'))]",
       "location": "[resourceGroup().location]",
-      "condition": "[not(empty(parameters('gitHubAppId')))]",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
       ],
@@ -221,11 +229,24 @@
     },
     {
       "apiVersion": "2019-09-01",
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "name": "[concat(variables('keyVaultName'), '/', variables('gitHubAppWebhookSecretSecretName'))]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ],
+      "properties": {
+        "value": "[parameters('gitHubAppWebhookSecret')]"
+      }
+    },
+    {
+      "apiVersion": "2019-09-01",
       "type": "Microsoft.KeyVault/vaults/accessPolicies",
       "name": "[concat(variables('keyVaultName'), '/add')]",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('gitHubAppIdSecretName'))]",
         "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('gitHubAppPrivateKeyContentSecretName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('gitHubAppWebhookSecretSecretName'))]",
         "[resourceId('Microsoft.Web/sites', variables('functionsWebAppName'))]"
       ],
       "properties": {

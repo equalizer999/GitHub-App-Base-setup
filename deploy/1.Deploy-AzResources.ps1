@@ -12,7 +12,10 @@ Param(
 
     [Parameter(Mandatory=$true)]
     [ValidateNotNullOrEmpty()]
-    [string] $GitHubAppPrivateKeyPath
+    [string] $GitHubAppPrivateKeyPath,
+
+    # Optional
+    [string] $GitHubAppWebhookSecret
 )
 
 $ErrorActionPreference = 'Stop'
@@ -31,6 +34,17 @@ $GitHubAppPrivateKeyContent = Get-Content $GitHubAppPrivateKeyPath -Raw
 $GitHubAppPrivateKeyContentAsSecureString = ConvertTo-SecureString $GitHubAppPrivateKeyContent -AsPlainText -Force
 
 Write-Host "-> Done"
+
+# Test if GitHubAppWebhookSecret is set and not contains an empty string and convert that value to a SecureString
+$GitHubAppWebhookSecretAsSecureString = $null
+if ($null -ne $GitHubAppWebhookSecret -and $GitHubAppWebhookSecret.Length -gt 0) {
+    Write-Output "Converting value from 'GitHubAppWebhookSecret' to SecureString"
+
+    # Convert GitHubAppWebhookSecret to SecureString
+    $GitHubAppWebhookSecretAsSecureString = ConvertTo-SecureString $GitHubAppWebhookSecret -AsPlainText -Force
+
+    Write-Host "-> Done"
+}
 
 # Test if template file path exists
 $TemplateFilePath = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($PSScriptRoot, $TemplateFile))
@@ -55,6 +69,7 @@ $deploymentResult = New-AzResourceGroupDeployment -Name ((Get-ChildItem $Templat
                                     -TemplateFile $TemplateFilePath `
                                     -gitHubAppId $GitHubAppId `
                                     -gitHubAppPrivateKeyContent $GitHubAppPrivateKeyContentAsSecureString `
+                                    -gitHubAppWebhookSecret $GitHubAppWebhookSecretAsSecureString `
                                     -Force `
                                     -ErrorVariable ErrorMessages
 

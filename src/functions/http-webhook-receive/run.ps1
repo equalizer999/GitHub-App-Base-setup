@@ -2,13 +2,81 @@ using namespace System.Net
 
 param ($Request, $TriggerMetadata)
 
+# Init : Request header and body variables
 $requestHeaders = $Request.Headers
 $requestBody = $Request.Body
+$requestRawBody = $Request.RawBody
 
+$githubRequestSignature = $requestHeaders.'X-Hub-Signature-256'
 $githubHeaderEvent = $requestHeaders.'X-GitHub-Event'
 $githubAppInstallTargetId = $requestHeaders.'X-GitHub-Hook-Installation-Target-ID'
 
+# Init : Environment variables
+$gitHubAppId = $env:GitHubAppId
+$gitHubAppPrivateKeyContentPlain = $env:GitHubAppPrivateKeyContent
+$gitHubAppPrivateKeyContent = [System.Text.Encoding]::UTF8.GetBytes($gitHubAppPrivateKeyContentPlain)
+$gitHubAppWebhookSecret = $env:GitHubAppWebhookSecret
+
+## TODO: Uncomment the following lines - only for debugging
+# Write-Host "GitHubAppID:                $gitHubAppId"
+# Write-Host "GitHubAppPrivateKeyContent: $gitHubAppPrivateKeyContentPlain"
+# Write-Host "GitHubAppWebhookSecret:     $gitHubAppWebhookSecret"
+
+# Validate if the request body is valid and not tempered with
+###########################################
+if($null -ne $githubRequestSignature -and $githubRequestSignature -ne '') {
+    Write-Host "Validating request body"
+
+    ## Setup right encodings
+    $rawBodyData = [Text.Encoding]::UTF8.GetBytes($requestRawBody)
+    $keyData = [Text.Encoding]::UTF8.GetBytes($gitHubAppWebhookSecret)
+
+    ## Compute the hash
+    $hmac = [System.Security.Cryptography.HMACSHA256]::new($keyData)
+    $bodyHash = $hmac.ComputeHash($rawBodyData)
+    $hmac.Dispose()
+
+    ## Convert to hex string and right format
+    $sha256 = [System.BitConverter]::ToString($bodyHash).ToLower().Replace("-", "")
+    $calculatedSignature = "sha256=$sha256"
+
+    ## Compare the computed signature with the header value
+    $signaturesEqual = $githubRequestSignature -eq $calculatedSignature
+
+    ## TODO: Uncomment the following lines - only for debugging
+    # Write-Host "Expected signature:   '$githubRequestSignature'"
+    # Write-Host "Calculated signature: '$calculatedSignature'"
+    # Write-Host "Signatures equal:     $signaturesEqual"
+
+    ## If the signatures are equal, the request body is valid
+    if ($signaturesEqual -eq $true) {
+        Write-Host "Validating request body - OK"
+    } else {
+        Write-Host "Validating request body - FAILED"
+
+        $responseBody = @{
+            message = 'The sha256 hash was incorrect, access not allowed'
+        } | ConvertTo-Json
+
+        # Push error response - 401 Unauthorized
+        Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
+            StatusCode = [HttpStatusCode]::Unauthorized
+            Headers = @{
+                "Content-type" = "application/json"
+            }
+            Body       = $responseBody
+        })
+
+        break
+    }
+} else {
+    Write-Host "[WARNING] !!NO request body validation will take place - Missing 'X-Hub-Signature-256' header - recommended to enable this!!"
+    ### Docs: https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks
+    ### Docs: https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries
+}
+
 # Check if the request comes from GitHub - Ping event
+###########################################
 if ($githubHeaderEvent -eq 'ping') {
     Write-Host "GitHub ping event received"
     $responseBody = @{
@@ -27,6 +95,7 @@ if ($githubHeaderEvent -eq 'ping') {
 }
 
 # Check if the request comes from GitHub - Installation event
+###########################################
 if ($githubHeaderEvent -eq 'installation') {
     Write-Host "GitHub installation event received"
 
@@ -48,11 +117,6 @@ if ($githubHeaderEvent -eq 'installation') {
 # Generate a GitHub App JWT token
 ### Docs: https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#authenticating-as-a-github-app
 #############################################
-
-## Init
-$gitHubAppId = $env:GitHubAppId
-$gitHubAppPrivateKeyContentPlain = $env:GitHubAppPrivateKeyContent
-$gitHubAppPrivateKeyContent = [System.Text.Encoding]::UTF8.GetBytes($gitHubAppPrivateKeyContentPlain)
 
 ## Generate 'iat' and 'exp' dates
 $exp = [int][double]::parse((Get-Date -Date $((Get-Date).addseconds(300).ToUniversalTime()) -UFormat %s))

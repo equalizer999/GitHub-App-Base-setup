@@ -186,15 +186,15 @@ This script generates a short-lived JWT token (5 min), which you can use to gene
 4. The '`Repo-name`', used for targeting additional API calls to point to the right repository. You can find this value by going to the repository and copying the name.
 
 # Additional resources
-- [Building a GitHub App that responds to webhook events - GitHub docs](https://docs.github.com/en/apps/creating-github-apps/writing-code-for-a-github-app/building-a-github-app-that-responds-to-webhook-events)
-  - [Best practices for using webhooks](https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks)
-  - [Validating webhook deliveries - GitHub docs](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries)
-- [Azure Functions PowerShell developer guide - MSFT Learn docs](https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-powershell?tabs=portal)
-- [Authenticating as a GitHub App - Generate a GitHub App JWT token - GitHub Docs](https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#authenticating-as-a-github-app)
-- [Create a secure GitHub webhook to trigger an Azure PowerShell Function - External](https://4bes.nl/2021/04/04/create-a-secure-github-webhook-to-trigger-an-azure-powershell-function/)
-- [Generating an installation access token for a GitHub App - GitHub docs ](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app)
-- [GitHub App setup - GitHub docs](https://docs.github.com/en/developers/apps/creating-a-github-app)
-- [GitHub App webhook events - GitHub docs](https://docs.github.com/en/developers/apps/setting-up-your-development-environment-to-create-a-github-app#webhook-events)
-- [List runners for an organization - GitHub docs](https://docs.github.com/en/rest/actions/self-hosted-runners#list-runner-applications-for-an-organization)
-- [Get Repository content - GitHub docs](https://docs.github.com/en/rest/repos/contents#get-repository-content)
-- [Approve or reject deployment - Custom Deployment rule - GitHub docs](https://docs.github.com/en/actions/deployment/protecting-deployments/creating-custom-deployment-protection-rules#approving-or-rejecting-deployments)
+- [Building a GitHub App that responds to webhook events](https://docs.github.com/en/apps/creating-github-apps/writing-code-for-a-github-app/building-a-github-app-that-responds-to-webhook-events) - GitHub docs
+  - [Best practices for using webhooks](https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks) - GitHub docs
+  - [Validating webhook deliveries](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries) - GitHub docs
+- [Azure Functions PowerShell developer guide](https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-powershell?tabs=portal) - MSFT Learn docs
+- [Authenticating as a GitHub App - Generate a GitHub App JWT token](https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#authenticating-as-a-github-app) - GitHub Docs
+- [Create a secure GitHub webhook to trigger an Azure PowerShell Function](https://4bes.nl/2021/04/04/create-a-secure-github-webhook-to-trigger-an-azure-powershell-function/) - External blog
+- [Generating an installation access token for a GitHub App](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app) - GitHub docs
+- [GitHub App setup](https://docs.github.com/en/developers/apps/creating-a-github-app) - GitHub docs
+- [GitHub App webhook events](https://docs.github.com/en/developers/apps/setting-up-your-development-environment-to-create-a-github-app#webhook-events) - GitHub docs
+- [List runners for an organization](https://docs.github.com/en/rest/actions/self-hosted-runners#list-runner-applications-for-an-organization) - GitHub docs
+- [Get Repository content](https://docs.github.com/en/rest/repos/contents#get-repository-content) - GitHub docs
+- [Approve or reject deployment - Custom Deployment rule](https://docs.github.com/en/actions/deployment/protecting-deployments/creating-custom-deployment-protection-rules#approving-or-rejecting-deployments) - GitHub docs
